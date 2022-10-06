@@ -11,7 +11,7 @@
 
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+    exit;
 }
 
 require __DIR__.'/vendor/autoload.php';
@@ -24,41 +24,41 @@ require __DIR__.'/vendor/autoload.php';
 
 add_filter( 'product_type_options', 'add_gift_card_checkbox' );
 function add_gift_card_checkbox( $actions ) {
-	global $product_object;
+    global $product_object;
   
-	$wrapper_classes = array();
-	foreach ( wc_gc_get_product_types_allowed() as $type ) {
-		$wrapper_classes[] = 'show_if_' . $type;
-	}
+    $wrapper_classes = array();
+    foreach ( wc_gc_get_product_types_allowed() as $type ) {
+        $wrapper_classes[] = 'show_if_' . $type;
+    }
 
-	$wrapper_classes[] = 'hide_if_bundle';
-	$wrapper_classes[] = 'hide_if_composite';
+    $wrapper_classes[] = 'hide_if_bundle';
+    $wrapper_classes[] = 'hide_if_composite';
 
-	$actions[ 'carte_cadeau' ] = array(
-		'id'            => '_carte_cadeau',
-		'wrapper_class' => implode( ' ', $wrapper_classes ),
-		'label'         => 'carte cadeau',
-		'description'   => '',
-		'default'       => is_gift_card( $product_object ) ? 'yes' : 'no'
-	);
+    $actions[ 'carte_cadeau' ] = array(
+        'id'            => '_carte_cadeau',
+        'wrapper_class' => implode( ' ', $wrapper_classes ),
+        'label'         => 'carte cadeau',
+        'description'   => '',
+        'default'       => is_gift_card( $product_object ) ? 'yes' : 'no'
+    );
 
   /*
    $actions[ 'gift_card' ] = array(
-			'id'            => '_gift_card',
-			'wrapper_class' => implode( ' ', $wrapper_classes ),
-			'label'         => __( 'Gift Card', 'woocommerce-gift-cards' ),
-			'description'   => __( 'Gift cards are virtual products that can be purchased by customers and gifted to one or more recipients. Gift card code holders can redeem and use them as store credit.', 'woocommerce-gift-cards' ),
-			'default'       => is_gift_card( $product_object ) || ( isset( $_GET[ 'todo' ] ) && 'giftcard' === $_GET[ 'todo' ] ) ? 'yes' : 'no'
-		);
+            'id'            => '_gift_card',
+            'wrapper_class' => implode( ' ', $wrapper_classes ),
+            'label'         => __( 'Gift Card', 'woocommerce-gift-cards' ),
+            'description'   => __( 'Gift cards are virtual products that can be purchased by customers and gifted to one or more recipients. Gift card code holders can redeem and use them as store credit.', 'woocommerce-gift-cards' ),
+            'default'       => is_gift_card( $product_object ) || ( isset( $_GET[ 'todo' ] ) && 'giftcard' === $_GET[ 'todo' ] ) ? 'yes' : 'no'
+        );
    */
 
-	return $actions;
+    return $actions;
 }
 function wc_gc_get_product_types_allowed() {
-	return array(
-		'simple',
-		'variable'
-	) ;
+    return array(
+        'simple',
+        'variable'
+    ) ;
 }
 
 function is_gift_card( $product ) {
@@ -149,8 +149,8 @@ function action_save_product_meta( $product ) {
     $product->update_meta_data( '_carte_cadeau', 'yes' );
   }
    else {
-			$product->delete_meta_data( '_carte_cadeau' );
-		}
+            $product->delete_meta_data( '_carte_cadeau' );
+        }
 
     if(  isset($carte_cadeau_product_link) && !empty( $carte_cadeau_product_link ) ) {
       $product->update_meta_data('carte_cadeau_product_link', $carte_cadeau_product_link ) ;
@@ -206,9 +206,9 @@ function shortcode_active_gift_card(){
 
 function do_form_active_gift_card() {
   //dd($_POST['sender_active_gift_card']);
-	if (isset($_POST['sender_active_gift_card']) && isset($_POST['verif-gift-card']))  {
+    if (isset($_POST['sender_active_gift_card']) && isset($_POST['verif-gift-card']))  {
 
-		if (wp_verify_nonce($_POST['verif-gift-card'], 'active-gift-card-nonce')) {
+        if (wp_verify_nonce($_POST['verif-gift-card'], 'active-gift-card-nonce')) {
           $gift_card_code = sanitize_text_field($_POST['gift_card_code']);
    
           if(empty($gift_card_code)) {
@@ -244,9 +244,9 @@ function do_form_active_gift_card() {
          
           exit();
          
-		}
+        }
 
-	}
+    }
 }
 add_action('template_redirect', 'do_form_active_gift_card');
 
@@ -300,7 +300,7 @@ function add_info_client_offer_to() {
     woocommerce_form_field( 'gift_card_code_field', array(
       'type'          => 'hidden',
       'class'         => array( 'hide' ),
-			'input_class'   => array('type-field-hidden'),
+            'input_class'   => array('type-field-hidden'),
       'required'      => false,
     ),$gift_card_code);
   }
@@ -423,8 +423,8 @@ function create_post_after_order($order_id) {
   }      
   
   $order = wc_get_order( $order_id );
-		// Récupérer les produits achetés
-	$cart_items = $order->get_items('line_item');
+        // Récupérer les produits achetés
+    $cart_items = $order->get_items('line_item');
   $new_gift_id_array = array();
   $offer_to = get_post_meta($order_id , 'offer_to', true);
   $message = get_post_meta($order_id , 'message_to_offer', true);
@@ -434,6 +434,9 @@ function create_post_after_order($order_id) {
 
   foreach( $cart_items as $item ) {
       $product_id = $item->get_product_id();
+      $product_name = $item->get_data()['name'];
+      
+    
     if(has_term( 'cartes-cadeaux', 'product_cat',  $product_id )) {
       $related_product_id = get_post_meta($product_id, 'carte_cadeau_product_link', true);
      
@@ -461,7 +464,7 @@ function create_post_after_order($order_id) {
         $new_gift_id = wp_insert_post( $new_gift );
       }
       $new_gift_id_array[]=  $new_gift_id;
-      $bon_cadeau_pdf_file = generate_pdf_bon_cadeau($new_gift_id);
+      $bon_cadeau_pdf_file = generate_pdf_bon_cadeau($new_gift_id, $product_name);
       
       //$order->save();
       
@@ -535,20 +538,20 @@ add_action( 'woocommerce_email_order_details', 'add_email_order_meta_gift',5, 4 
 
 function add_email_order_meta_gift($order, $sent_to_admin, $plain_text, $email  ){
   if ( $sent_to_admin ) {
-		return;
-	}
+        return;
+    }
 
   $bons_cadeaux_id_array = get_post_meta( $order->id, 'bons_cadeaux_id_array', true );
  
-	// we won't display anything if it is not a gift
-	if( empty( $bons_cadeaux_id_array ) ) {
-		return;
-	}
+    // we won't display anything if it is not a gift
+    if( empty( $bons_cadeaux_id_array ) ) {
+        return;
+    }
  
   ob_start(); ?>
 
 
-	<h2>Code cadeau</h2>
+    <h2>Code cadeau</h2>
   <?php foreach($bons_cadeaux_id_array as $bon_cadeau_id) : ?>
 
     <div style="border:1px solid #000; padding: 30px; margin:30px 0;">
@@ -560,7 +563,7 @@ function add_email_order_meta_gift($order, $sent_to_admin, $plain_text, $email  
 <?php endforeach; ?>
   
 
-	<?php echo ob_get_clean(); 
+    <?php echo ob_get_clean(); 
 
 }
 
@@ -574,8 +577,8 @@ function test_before_tankyou($order_id) {
   //dump(get_post_meta( $order_id, '', true));
   $bons_cadeaux_id_array = get_post_meta( $order_id, 'bons_cadeaux_id_array', true);
   if( empty( $bons_cadeaux_id_array ) ) {
-		return;
-	}
+        return;
+    }
  echo '<h2>Code cadeau</h2>'; 
  foreach($bons_cadeaux_id_array as $bon_cadeau_id) : ?>
 
@@ -616,57 +619,89 @@ function pdf_bon_cadeau_attach_to_emails( $attachments, $email_id, $order, $emai
 }
 
 
-function generate_pdf_bon_cadeau($bon_cadeau_id){
+function generate_pdf_bon_cadeau($bon_cadeau_id, $product_name){
   $upload_dir = wp_upload_dir();
   $code = get_the_title($bon_cadeau_id); 
   $offer_to = get_post_meta( $bon_cadeau_id, 'offer_to', true );
   $message = get_post_meta( $bon_cadeau_id, 'message', true ); 
   $related_product_id = get_post_meta( $bon_cadeau_id, 'related_product_id', true ); 
 
+  $defaultConfig = (new Mpdf\Config\ConfigVariables())->getDefaults();
+  $fontDirs = $defaultConfig['fontDir'];
+  
+  $defaultFontConfig = (new Mpdf\Config\FontVariables())->getDefaults();
+  $fontData = $defaultFontConfig['fontdata'];
 
-  $mpdf = new \Mpdf\Mpdf(); // Create new mPDF Document
-  ob_start();?>
-  <div style="border-top:1px solid #000; padding-top:30px; text-align:center; font-weight:normal">
-    <b>Ma Box Pâtisserie</b>, 40 rue de Bruxelles, 69100 Villeurbanne, FRANCE
-  </div>
-  <?php
-  $footer = ob_get_contents();
-  ob_end_clean();
-  $mpdf->SetFooter($footer);
+  $mpdf = new \Mpdf\Mpdf(
+    [
+      'fontDir' => array_merge($fontDirs, [
+          __DIR__ . '/fonts',
+      ]),
+      'fontdata' => $fontData + [ // lowercase letters only in font key
+          'fraunces' => [
+              'R' => 'fraunces-regular.ttf',
+              'B'  => "fraunces-black.ttf",
+              'I' => 'fraunces-italic.ttf',
+          ],
+          "lato" => array( 
+            'R'  => "Lato-Regular.ttf",
+            'B'  => "Lato-Bold.ttf",
+            'I' => 'Lato-Italic.ttf',
+        ),
+      ]
+  ]
+  ); // Create new mPDF Document
+ 
+
+
 // Beginning Buffer to save PHP variables and HTML tags
 ob_start();
 ?>  
-  <div style="text-align:center;">
-  <?php $logo_url = trailingslashit( $upload_dir['basedir'] ).'/2022/05/Logo-ma-box-patisserie-principal.png'; ?> 
-  <img width="300px" src="<?php echo $logo_url; ?>" />
+<style>
+
+@page {
+    background-color: #FEFDF0;
+}
+</style>
+
+  <div  style="text-align:center; font-size:32px; font-family: fraunces; color: #AD5018; position:relative; min-height:300px; font-weight:900">
+      <h1 style="text-transform:uppercase"><?php echo $product_name ?> </h1>
   </div>
-  <div  style="text-align:center;">
-      <h1 style="padding: 10px; ">BON CADEAU</h1>
-      <p style="font-weight:bold; font-size:1.5em">pour <?php echo $offer_to; ?></p>
-  </div>
-  <?php if(!empty($message)): ?>
-  <div style="text-align:center; font-size:1.5em; margin-top:10px; margin-bottom:20px;">
-    <?php echo $message; ?>
-  </div>
-  <?php endif; ?>
-  <div style="text-align:center; margin-top:30px; margin-bottom:30px;">
-  <?php $image = wp_get_attachment_image_src( get_post_thumbnail_id( $related_product_id ), 'single-post-thumbnail' );?>
-       <img src="<?php  echo $image[0]; ?>" >
-  </div>
-  <h2 style="text-align:center;">Code cadeau</h2>
-  <div style="border:1px solid #000; padding: 30px; margin:30px 0;">
-      <p style="margin:0px; text-align:center; font-size:2em; line-height: 1em; font-weight:bold">
-      <?php  echo $code; ?>
-    </p>
+  <div  style="position: fixed; right:15px; top:100px">
+    <?php $image = wp_get_attachment_image_src( get_post_thumbnail_id( $related_product_id ), 'single-post-thumbnail' );?>
+        <img src="<?php  echo $image[0]; ?>" width="160px" >
     </div>
-  
+  <div style=" width:65%; margin:10px auto;">
+   <img src="<?php  echo  __DIR__.'/img/illustration.png' ?>" >
   </div>
+    <h2 style="font-family: lato; text-align:center; font-size:2em; color: #AD5018; text-transform:uppercase; margin-top:50px;">
+        Active ta carte cadeau<br/>
+        avec ton code ci-dessous
+    </h2>
+    <div style=" font-family: lato; text-align:center;">
+      <p style="margin:20px 0;  font-size:3em; line-height: 1em; font-weight:bold">
+      <?php  echo $code; ?>
+      </p>
+    
+      <div style=" font-family: lato; margin-top:10px; text-transform:uppercase; font-size:2em; color: #AD5018; font-weight:bold">Sur www.maboxpatisserie.fr</div>
+    </div>
+</div>
   
 
 <?php
 $html = ob_get_contents();
 ob_end_clean();
 
+
+ob_start();?>
+<div style="border-top:1px solid #000; padding-top:30px; text-align:center; font-weight:normal">
+  <b>Ma Box Pâtisserie</b>, 40 rue de Bruxelles, 69100 Villeurbanne, FRANCE
+</div>
+<?php
+$footer = ob_get_contents();
+ob_end_clean();
+$mpdf->SetFooter($footer);
+$mpdf->SetDisplayMode('fullpage');
 $mpdf->pdf_version = '1.5';
 $mpdf->WriteHTML($html);
 
