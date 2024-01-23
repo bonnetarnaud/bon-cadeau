@@ -355,8 +355,9 @@ function do_form_active_gift_card()
       }
       WC()->cart->empty_cart();
       WC()->cart->add_to_cart($related_product_id);
-
-      WC()->session->__unset('gift_card_code');
+      if (WC()->session->__isset('gift_card_code')) {
+        WC()->session->__unset('gift_card_code');
+      }
       WC()->session->set('gift_card_code', sanitize_text_field($gift_card_code));
 
       wp_safe_redirect(wc_get_checkout_url());
