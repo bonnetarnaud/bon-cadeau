@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Bon cadeau
  * Description: Permet l'achat de bon cadeau relier à un produit
- * Version: 1.2
+ * Version: 1.4
  * Author: Oplus 
  * Author URI: https://oplus.digital
  */
@@ -201,10 +201,24 @@ function maboxpatisserie_add_meta_boxes_order()
   if (!$order) return;
 
   $bons_cadeaux_id_array = get_post_meta($order->get_id(), 'bons_cadeaux_id_array', true);
-
-  if (empty($bons_cadeaux_id_array)) return;
+  if (!checkisGiftOrder($order)) return;
   add_meta_box('regenerated_gift_card_box', 'Bon cadeaux', 'regenerated_gift_card_box_callback', 'shop_order', 'side', 'core');
 }
+
+function checkisGiftOrder($order)
+{
+  $cart_items = $order->get_items();
+  foreach ($cart_items as $item) {
+    $product_id = $item->get_product_id();
+    $product = wc_get_product($product_id);
+    $product_categories = get_the_terms($product_id, 'product_cat');
+    if (has_term('cartes-cadeaux', 'product_cat',  $product_id)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 
 
 function regenerated_gift_card_box_callback()
@@ -212,8 +226,8 @@ function regenerated_gift_card_box_callback()
   $order = wc_get_order(get_the_ID());
   $cart_items = $order->get_items();
   $bons_cadeaux_id_array = get_post_meta($order->get_id(), 'bons_cadeaux_id_array', true);
+  if (!checkisGiftOrder($order)) return;
 
-  if (empty($bons_cadeaux_id_array)) return;
   foreach ($bons_cadeaux_id_array as $bon_cadeau_id) {
     $used = get_post_meta($bon_cadeau_id, 'used', true);
     $upload_dir = wp_upload_dir();
@@ -229,6 +243,7 @@ function regenerated_gift_card_box_callback()
 
     echo '</p>';
   }
+
   $count_gif_code_generated = 0;
   foreach ($cart_items as $item) {
     $product_id = $item->get_product_id();
@@ -240,11 +255,11 @@ function regenerated_gift_card_box_callback()
     }
   }
 
+
+
   echo '<hr/>';
   echo '<img id="regeneratedgiftcardspinner" src="' . esc_url(get_admin_url('', "images/loading.gif")) . '" style="display:none"/>';
   echo '<a href="#" class="button button-primary"  id="callajaxregeneratedgiftcard" data-order="' . get_the_ID() . '" >Regénérer les bons cadeaux</a>';
-
-  //}
 }
 
 // Save the data of the Meta field
@@ -272,7 +287,6 @@ function regenerated_gift_card($order_id)
 
   $all_new_gift_id_array = array();
   foreach ($cart_items as $item) {
-
     $array_ids = create_new_gift_ids_array($item, $order_id);
     $all_new_gift_id_array = array_merge($all_new_gift_id_array, $array_ids);
   }
@@ -425,10 +439,7 @@ function addDiscount($cart_object)
   }
 }
 
-function my_check_needs_payement($needs_payment, $cart)
-{
-  dd($cart);
-}
+function my_check_needs_payement($needs_payment, $cart) {}
 
 // if achat carte cadeau in panier 
 
@@ -635,7 +646,9 @@ function  generate_post_bon_cadeau($order_id, $product_id)
       'used' => 0
     )
   );
-
+  if ( ! function_exists( 'post_exists' ) ) {
+    require_once( ABSPATH . 'wp-admin/includes/post.php' );
+}
 
   if (post_exists($titre, '', '', 'bons_cadeaux', 'publish')) return;
   $new_gift_id = wp_insert_post($new_gift);
